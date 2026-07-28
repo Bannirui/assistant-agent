@@ -76,8 +76,12 @@ async def startup() -> None:
         import_from_yaml()
         sop_engine.load_all()
 
-    # 初始化RAG 初始化向量数据库
+    # 初始化RAG检索器
     knowledge_base.initialize()
+    status = knowledge_base.get_status()
+    if status.get("points_count", 0) == 0:
+        # 向量库为空 自动从知识库目录导入文档
+        knowledge_base.ingest_directory()
 
 
 @app.get("/api/copilot/status")
@@ -116,7 +120,7 @@ async def analyze_ticket(req: AnalyzeRequest) -> AnalyzeResponse:
 @app.post("/admin/sop/reload")
 async def reload_sop() -> dict[str, Any]:
     r"""
-    从数据库重新加载 SOP 到内存
+    从数据库重新加载SOP到内存
     """
     result: dict[str, Any] = sop_engine.reload()
     return result

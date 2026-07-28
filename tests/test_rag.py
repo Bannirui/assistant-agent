@@ -1,5 +1,6 @@
 import pytest
-from src.rag.knowledge_base import KnowledgeBase
+from src.rag.knowledge_base import KnowledgeBase, COLLECTION_NAME
+from src.rag.repository import get_repository
 
 
 class TestChunking:
@@ -35,17 +36,24 @@ class TestChunking:
         for chunk in chunks:
             assert chunk["source"] == "policy.md"
 
+    def test_chunk_long_paragraph_no_overflow(self, kb):
+        """单段落超过 CHUNK_SIZE 也要被切成多块"""
+        long_para = "X" * 800 + "\n\n" + "Y" * 300
+        chunks = kb.chunk_text(long_para, source="test.md")
+        assert len(chunks) >= 2
+        for c in chunks:
+            assert len(c["text"]) <= 520   # CHUNK_SIZE 512 + 少量余量
+
 
 class TestKnowledgeBase:
     def test_initialize_creates_collection(self):
         kb = KnowledgeBase()
         kb.initialize()
-        assert kb.client is not None
-        collections = kb.client.get_collections()
-        collection_names = [c.name for c in collections.collections]
-        assert "knowledge_base" in collection_names
+        repo = get_repository()
+        status = repo.get_status(COLLECTION_NAME)
+        assert status["status"] == "ready"
 
-    def test_status_not_initialized(self):
-        kb = KnowledgeBase()
-        status = kb.get_status()
-        assert status["status"] == "not_initialized"
+    def test_repo_status(self):
+        repo = get_repository()
+        status = repo.get_status(COLLECTION_NAME)
+        assert status["status"] == "ready"

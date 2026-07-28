@@ -40,17 +40,20 @@ class Settings(BaseSettings):
     copilot_sop_dir: str = "./data/sop"
     # 知识库文档目录
     copilot_knowledge_dir: str = "./data/knowledge"
-    # Qdrant向量数据存储路径
+    # 向量库类型 qdrant/chroma/milvus
+    copilot_vector_type: str = "qdrant"
+    # 用Qdrant本地模式时 向量数据存储路径
     copilot_qdrant_path: str = "./data/qdrant"
-    # 数据库用哪个 sqlite/mysql
+    # 数据库类型 sqlite/mysql
     copilot_db_type: str = "sqlite"
     # SQLite数据库路径 存储SOP
     copilot_db_path: str = "./data/copilot.db"
-    # 要是用mysql
-    copilot_db_ip: str
-    copilot_db_port: int
-    copilot_db_user: str
-    copilot_db_pwd: str
+    # MySQL连接信息 copilot_db_type=mysql时使用
+    copilot_db_host: str = ""
+    copilot_db_port: int = 3306
+    copilot_db_user: str = ""
+    copilot_db_pass: str = ""
+    copilot_db_name: str = "copilot"
 
     # 服务配置
     copilot_host: str = "0.0.0.0"
