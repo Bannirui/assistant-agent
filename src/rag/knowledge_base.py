@@ -3,7 +3,7 @@ from pathlib import Path
 
 from ..config import settings
 from ..llm.provider import registry as provider_registry
-from .repository import get_repository, VectorPoint, SearchResult
+from .vector.vector_repo import get_repository, VectorPoint, SearchResult
 
 # 向量库表名 文档数据库的概念
 COLLECTION_NAME = "knowledge_base"
@@ -105,16 +105,49 @@ class KnowledgeBase:
         # 拿到向量模型调用API转向量
         return provider_registry.embed.embed(texts)
 
+    def _build_index(self, all_chunks: list[dict]) -> dict:
+        """chunk → embed → 写入向量库"""
+        if not all_chunks:
+            return {"status": "ok", "message": "No documents found", "count": 0}
+
+        texts = [c["text"] for c in all_chunks]
+        embeddings = self._embed(texts)
+
+        repo = get_repository()
+        repo.clear(COLLECTION_NAME)
+        repo.init(COLLECTION_NAME, VECTOR_SIZE)
+
+        points = []
+        for i, (chunk, emb) in enumerate(zip(all_chunks, embeddings)):
+            points.append(VectorPoint(
+                id=i,
+                vector=emb,
+                text=chunk["text"],
+                source=chunk["source"],
+                heading=chunk.get("heading", ""),
+            ))
+
+        repo.upsert(COLLECTION_NAME, points)
+        return {"status": "ok", "count": len(points), "sources": list(set(c["source"] for c in all_chunks))}
+
+    def ingest_from_db(self) -> dict:
+        """从 knowledge_docs 表读取文档，切块、向量化、写入向量库"""
+        from .db.doc_store import get_doc_repo
+        docs = get_doc_repo().list_all()
+
+        all_chunks = []
+        for doc in docs:
+            chunks = self.chunk_text(doc.content, source=doc.title)
+            all_chunks.extend(chunks)
+
+        return self._build_index(all_chunks)
+
     def ingest_directory(self, directory: Optional[Path] = None) -> dict:
         r"""
-        知识库的文件切片完转换向量 存到向量表
-        :param directory: 知识库md文件所在的目录
-        :return:
+        从本地 .md 文件导入 (需显式指定路径 生产环境无本地文件)
         """
         if directory is None:
-            directory = settings.knowledge_path
-        if not directory.exists():
-            return {"status": "error", "message": f"Directory not found: {directory}"}
+            return {"status": "error", "message": "No directory specified"}
 
         # 知识库所有文件被分成的块
         all_chunks = []
@@ -125,37 +158,7 @@ class KnowledgeBase:
             chunks = self.chunk_text(content, source=file_path.name)
             all_chunks.extend(chunks)
 
-        if not all_chunks:
-            return {"status": "ok", "message": "No documents found", "count": 0}
-
-        # 知识库所有的块内容
-        texts = [c["text"] for c in all_chunks]
-        # 知识库所有的块内容对应的向量
-        embeddings = self._embed(texts)
-        # 向量库
-        repo = get_repository()
-        # 清空表
-        repo.clear(COLLECTION_NAME)
-        # 建表
-        repo.init(COLLECTION_NAME, VECTOR_SIZE)
-
-        points = []
-        for i, (chunk, embedding) in enumerate(zip(all_chunks, embeddings)):
-            points.append(VectorPoint(
-                id=i,
-                # 块内容对应的向量
-                vector=embedding,
-                # 块内容
-                text=chunk["text"],
-                # 文件名
-                source=chunk["source"],
-                # 块内容对应的标题名
-                heading=chunk.get("heading", ""),
-            ))
-        # 写到向量表
-        repo.upsert(COLLECTION_NAME, points)
-
-        return {"status": "ok", "count": len(points), "sources": list(set(c["source"] for c in all_chunks))}
+        return self._build_index(all_chunks)
 
     def search(self, query: str, top_k: int = 5) -> list[dict]:
         r"""

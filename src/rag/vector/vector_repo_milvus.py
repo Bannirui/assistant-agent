@@ -3,7 +3,7 @@ Milvus
 参考https://milvus.io/docs/
 """
 
-from .repository import VectorRepository, VectorPoint, SearchResult
+from .vector_repo import VectorRepository, VectorPoint, SearchResult
 
 
 class VectorRepositoryMilvus(VectorRepository):

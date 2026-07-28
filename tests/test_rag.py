@@ -1,6 +1,6 @@
 import pytest
 from src.rag.knowledge_base import KnowledgeBase, COLLECTION_NAME
-from src.rag.repository import get_repository
+from src.rag.vector.vector_repo import get_repository
 
 
 class TestChunking:

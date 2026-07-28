@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Optional
 
-from ..config import settings
+from ...config import settings
 
 
 # SOP存到数据库的数据模型
@@ -51,6 +51,13 @@ class SopRepository(ABC):
         """
 
     @abstractmethod
+    def soft_delete(self, sop_id: str) -> None:
+        r"""
+        软删除SOP 标记为archived
+        :param sop_id: SOP的ID
+        """
+
+    @abstractmethod
     def import_from_yaml(self, yaml_dir: str = "") -> int:
         r"""
         尝试把本地的SOP文件导入到数据库去
@@ -70,7 +77,7 @@ def get_repository() -> SopRepository:
     """
     global _repo
     if _repo is None:
-        sql_type: str = getattr(settings, "copilot_db_type", "sqlite")
+        sql_type: str = getattr(settings, "sop_db_type", "sqlite")
         if sql_type == "mysql":
             from .db_mysql import SopRepositoryMySQL
             _repo = SopRepositoryMySQL()
@@ -117,4 +124,8 @@ def upsert_sop(sop: dict, updated_by: str = "") -> None:
 
 def import_from_yaml(yaml_dir: str = "") -> int:
     return get_repository().import_from_yaml(yaml_dir)
+
+
+def archive_sop(sop_id: str) -> None:
+    get_repository().soft_delete(sop_id)
 # ---把数据库的操作暴露到模块层级 end---

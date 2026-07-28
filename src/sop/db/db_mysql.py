@@ -4,7 +4,7 @@ MySQL占位
 参考SQL https://dev.mysql.com/doc/refman/8.0/en/create-table.html
 """
 
-from .db import SopRepository, SopRecord
+from .sop_repo import SopRepository, SopRecord
 
 
 class SopRepositoryMySQL(SopRepository):
@@ -15,6 +15,9 @@ class SopRepositoryMySQL(SopRepository):
         raise NotImplementedError("MySQL is not yet implemented")
 
     def upsert(self, record: SopRecord, updated_by: str = "") -> None:
+        raise NotImplementedError("MySQL is not yet implemented")
+
+    def soft_delete(self, sop_id: str) -> None:
         raise NotImplementedError("MySQL is not yet implemented")
 
     def import_from_yaml(self, yaml_dir: str = "") -> int:

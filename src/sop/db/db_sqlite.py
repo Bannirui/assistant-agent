@@ -3,8 +3,8 @@ import sqlite3
 from pathlib import Path
 from typing import Optional
 
-from .db import SopRepository, SopRecord
-from ..config import settings
+from .sop_repo import SopRepository, SopRecord
+from ...config import settings
 
 
 SQLITE_SCHEMA = """
@@ -54,7 +54,7 @@ class SopRepositorySQLite(SopRepository):
         :return: sqlite数据库 内嵌路径
         """
         if self._db_path is None:
-            p = Path(settings.copilot_db_path)
+            p = Path(settings.sop_db_path)
             p.parent.mkdir(parents=True, exist_ok=True)
             self._db_path = p
         return self._db_path
@@ -133,12 +133,25 @@ class SopRepositorySQLite(SopRepository):
         finally:
             conn.close()
 
+    def soft_delete(self, sop_id: str) -> None:
+        conn = self._connect()
+        try:
+            conn.execute(
+                "UPDATE sops SET status='archived', updated_at=datetime('now') WHERE id=?",
+                (sop_id,),
+            )
+            conn.commit()
+        finally:
+            conn.close()
+
     def import_from_yaml(self, yaml_dir: str = "") -> int:
         import yaml
         import glob
         import os
 
-        path = yaml_dir or settings.copilot_sop_dir
+        path = yaml_dir
+        if not path:
+            return 0
         files = glob.glob(os.path.join(path, "*.yaml"))
         count = 0
 

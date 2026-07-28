@@ -3,7 +3,7 @@ ChromaDB
 参考https://docs.trychroma.com/
 """
 
-from .repository import VectorRepository, VectorPoint, SearchResult
+from .vector_repo import VectorRepository, VectorPoint, SearchResult
 
 
 class VectorRepositoryChroma(VectorRepository):

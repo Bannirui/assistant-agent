@@ -7,8 +7,8 @@ from typing import Optional
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct
 
-from ..config import settings
-from .repository import VectorRepository, VectorPoint, SearchResult
+from ...config import settings
+from .vector_repo import VectorRepository, VectorPoint, SearchResult
 
 
 class VectorRepositoryQdrant(VectorRepository):

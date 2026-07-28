@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Optional
 
-from ..config import settings
+from ...config import settings
 
 
 # ── 数据模型 ──────────────────────────────────────────
@@ -91,12 +91,12 @@ def get_repository() -> VectorRepository:
     if _repo is None:
         impl_type = getattr(settings, "copilot_vector_type", "qdrant")
         if impl_type == "chroma":
-            from .repository_chroma import VectorRepositoryChroma
+            from .vector_repo_chroma import VectorRepositoryChroma
             _repo = VectorRepositoryChroma()
         elif impl_type == "milvus":
-            from .repository_milvus import VectorRepositoryMilvus
+            from .vector_repo_milvus import VectorRepositoryMilvus
             _repo = VectorRepositoryMilvus()
         else:
-            from .repository_qdrant import VectorRepositoryQdrant
+            from .vector_repo_qdrant import VectorRepositoryQdrant
             _repo = VectorRepositoryQdrant()
     return _repo
