@@ -1,6 +1,11 @@
 services:
   backend:
-    build: .
+    build:
+      context: .
+      args:
+        # 优先从.env里面读变量作为docker的环境变量
+        HTTP_PROXY: ${HTTP_PROXY}
+        HTTPS_PROXY: ${HTTPS_PROXY}
     ports:
       - "8000:8000"
     volumes:
@@ -13,7 +18,11 @@ services:
     command: uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        HTTP_PROXY: ${HTTP_PROXY}
+        HTTPS_PROXY: ${HTTPS_PROXY}
     ports:
       - "3000:3000"
     volumes:
