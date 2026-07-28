@@ -1,14 +1,23 @@
 .DS_Store
-
 .idea
 
+.opencode/
+
+# 日志
+*.log
+
+# Python
 .venv/
 __pycache__/
 *.pyc
-.env
 .pytest_cache/
-data/qdrant/
+*.egg-info/
+# 环境变量
+.env
+
+# 前端
 node_modules/
 dist/
-*.log
-*.egg-info/
+
+# 数据
+data/qdrant/
