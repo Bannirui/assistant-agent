@@ -74,7 +74,13 @@ curl -X POST http://localhost:8000/admin/knowledge/ingest
 ```bash
 cp .env.example .env
 # 编辑 .env 填入 API Key
+
+# 只有源码改动
 docker compose up
+
+# 有package或者requirement的依赖变更
+docker compose up --build
+
 
 # 初始化知识库
 curl -X POST http://localhost:8000/admin/knowledge/ingest
