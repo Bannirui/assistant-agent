@@ -7,22 +7,24 @@ class Settings(BaseSettings):
     # LLM大模型
     # 供应商标识 deepseek/openai/qwen
     llm_provider: str = ""
+    # 下面3个是模型的必填参数 不用默认值 强制让py校验必填
     # 模型名称 deepseek-chat/gpt-4o
-    llm_model: str = ""
+    llm_model: str
     # API密钥
-    llm_api_key: str = ""
+    llm_api_key: str
     # API地址
-    llm_base_url: str = ""
+    llm_base_url: str
 
     # 向量模型
     # 供应商标识 dashscope/openai/local
     embed_provider: str = ""
+    # 下面3个是模型的必填参数 不用默认值 强制让py校验必填
     # 模型名称
-    embed_model: str = ""
+    embed_model: str
     # API密钥
-    embed_api_key: str = ""
+    embed_api_key: str
     # API地址
-    embed_base_url: str = ""
+    embed_base_url: str
 
     # 应用配置
     # 运行环境
