@@ -20,5 +20,4 @@ node_modules/
 dist/
 
 # 数据
-data/qdrant/
-data/*.db
+[Dd][Aa][Tt][Aa]
