@@ -5,22 +5,23 @@ AI 驱动的旅游企业客服助手，以工单号为唯一输入，自动聚�
 ## 架构概览
 
 ```
-客服输入工单号
-      │
-      ▼
-┌─────────────────────────────────────┐
-│           Copilot Agent (ReAct)     │
-│                                     │
-│  ┌─────────┐  ┌─────────┐  ┌──────┤
-│  │SOP 引擎  │  │计算引擎  │  │ RAG  │
-│  └─────────┘  └─────────┘  └──────┤
-└─────────────────────────────────────┘
-      │
-      ▼
-┌─────────────────────────────────────┐
-│         Vue 3 工作台                │
-│  左侧对话面板 | 右侧 Copilot 分析    │
-└─────────────────────────────────────┘
+Ticket Input
+     │
+     ▼
+┌──────────────────────────────┐
+│     Copilot Agent (ReAct)    │
+│                              │
+│  ┌────────┐┌──────────┐┌────┐│
+│  │  SOP   ││Calculate ││RAG ││
+│  │ Engine ││ Engine   ││ KB ││
+│  └────────┘└──────────┘└────┘│
+└──────────────────────────────┘
+     │
+     ▼
+┌────────────────────────────┐
+│      Vue 3 Workstation     │
+│  Left: Chat | Right: Panel │
+└────────────────────────────┘
 ```
 
 ## 技术栈
@@ -37,51 +38,48 @@ AI 驱动的旅游企业客服助手，以工单号为唯一输入，自动聚�
 
 ## 快速开始
 
-### 环境要求
-
-- Python 3.11+
-- Node.js 20+
-- Docker & Docker Compose (可选)
-
-### 安装
+### 方式一: 本地开发
 
 ```bash
-# 后端
+# 1. 配置环境
 cp .env.example .env
 # 编辑 .env 填入 API Key
+
+# 2. 后端安装
 python -m venv .venv
 source .venv/bin/activate
 pip install -e ".[dev]"
 
-# 前端
+# 3. 前端安装
 cd frontend
 npm install
-```
+cd ..
 
-### 运行
-
-```bash
-# 启动后端
+# 4. 启动后端 (终端1)
 source .venv/bin/activate
 uvicorn src.main:app --reload --port 8000
 
-# 启动前端 (另一个终端)
+# 5. 启动前端 (终端2)
 cd frontend
 npm run dev
 
-# 访问 http://localhost:3000
-```
-
-### Docker Compose 启动
-
-```bash
-docker compose up
-```
-
-### 初始化知识库
-
-```bash
+# 6. 初始化知识库
 curl -X POST http://localhost:8000/admin/knowledge/ingest
+
+# 7. 访问 http://localhost:3000
+```
+
+### 方式二: Docker Compose
+
+```bash
+cp .env.example .env
+# 编辑 .env 填入 API Key
+docker compose up
+
+# 初始化知识库
+curl -X POST http://localhost:8000/admin/knowledge/ingest
+
+# 访问 http://localhost:3000
 ```
 
 ### 运行测试
@@ -96,8 +94,10 @@ source .venv/bin/activate && python -m pytest tests/ -v
 assistant-agent/
 ├── src/
 │   ├── agent/          # Agent ReAct 循环
+│   ├── api/            # API 路由 (预留)
 │   ├── calculator/     # 退改计算引擎 (状态机)
 │   ├── config.py       # 配置加载
+│   ├── llm/            # LLM/Embedding Provider 抽象
 │   ├── main.py         # FastAPI 入口
 │   ├── mocks/          # Mock 外部系统
 │   ├── rag/            # RAG 知识库

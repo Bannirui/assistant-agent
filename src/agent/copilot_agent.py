@@ -1,7 +1,7 @@
 from typing import Optional
-from openai import OpenAI
 
 from ..config import settings
+from ..llm.provider import registry as provider_registry
 from ..router.order_router import router as order_router
 from ..sop.engine import sop_engine
 from ..calculator.engine import calculator_registry
@@ -147,16 +147,7 @@ OUTPUT_FORMAT_REMINDER = """请基于以上所有信息，生成最终的分析�
 
 class CopilotAgent:
     def __init__(self):
-        self.client: Optional[OpenAI] = None
         self.max_iterations = settings.copilot_max_agent_iterations
-
-    def _get_client(self) -> OpenAI:
-        if self.client is None:
-            self.client = OpenAI(
-                api_key=settings.deepseek_api_key,
-                base_url=settings.deepseek_base_url,
-            )
-        return self.client
 
     def _execute_tool(self, tool_name: str, arguments: dict) -> str:
         if tool_name == "get_ticket":
@@ -206,7 +197,7 @@ class CopilotAgent:
         return f"未知工具: {tool_name}"
 
     def analyze(self, ticket_id: str) -> dict:
-        client = self._get_client()
+        provider = provider_registry.chat
 
         messages = [
             {"role": "system", "content": SYSTEM_PROMPT},
@@ -214,39 +205,22 @@ class CopilotAgent:
         ]
 
         for iteration in range(self.max_iterations):
-            response = client.chat.completions.create(
-                model=settings.deepseek_model,
-                messages=messages,
-                tools=TOOLS,
-                tool_choice="auto",
-            )
+            response = provider.chat(messages, tools=TOOLS)
 
-            msg = response.choices[0].message
-
-            if msg.tool_calls:
+            if response.tool_calls:
                 messages.append({
                     "role": "assistant",
-                    "content": msg.content or "",
-                    "tool_calls": [
-                        {
-                            "id": tc.id,
-                            "type": "function",
-                            "function": {
-                                "name": tc.function.name,
-                                "arguments": tc.function.arguments,
-                            },
-                        }
-                        for tc in msg.tool_calls
-                    ],
+                    "content": response.content or "",
+                    "tool_calls": response.tool_calls,
                 })
 
-                for tc in msg.tool_calls:
+                for tc in response.tool_calls:
                     import json
-                    args = json.loads(tc.function.arguments)
-                    result = self._execute_tool(tc.function.name, args)
+                    args = json.loads(tc["function"]["arguments"])
+                    result = self._execute_tool(tc["function"]["name"], args)
                     messages.append({
                         "role": "tool",
-                        "tool_call_id": tc.id,
+                        "tool_call_id": tc["id"],
                         "content": result,
                     })
             else:
@@ -254,11 +228,8 @@ class CopilotAgent:
                     "role": "user",
                     "content": OUTPUT_FORMAT_REMINDER,
                 })
-                final_response = client.chat.completions.create(
-                    model=settings.deepseek_model,
-                    messages=messages,
-                )
-                return self._parse_output(final_response.choices[0].message.content or "")
+                final_response = provider.chat(messages)
+                return self._parse_output(final_response.content or "")
 
         return {
             "analysis": {"intent": "超出迭代次数", "emotion": "未知", "risk": "高"},

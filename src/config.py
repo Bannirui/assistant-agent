@@ -4,13 +4,15 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    deepseek_api_key: str = ""
-    deepseek_base_url: str = "https://api.deepseek.com/v1"
-    deepseek_model: str = "deepseek-chat"
+    llm_provider: str = "deepseek"
+    llm_model: str = "deepseek-chat"
+    llm_api_key: str = ""
+    llm_base_url: str = "https://api.deepseek.com/v1"
 
-    dashscope_api_key: str = ""
-    dashscope_base_url: str = "https://dashscope.aliyuncs.com/compatible-mode/v1"
-    dashscope_embedding_model: str = "text-embedding-v3"
+    embed_provider: str = "dashscope"
+    embed_model: str = "text-embedding-v3"
+    embed_api_key: str = ""
+    embed_base_url: str = "https://dashscope.aliyuncs.com/compatible-mode/v1"
 
     copilot_env: str = "development"
     copilot_log_level: str = "DEBUG"

@@ -3,9 +3,9 @@ from pathlib import Path
 
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct
-from openai import OpenAI
 
 from ..config import settings
+from ..llm.provider import registry as provider_registry
 
 
 COLLECTION_NAME = "knowledge_base"
@@ -17,7 +17,6 @@ CHUNK_SIZE = 512
 class KnowledgeBase:
     def __init__(self):
         self.client: Optional[QdrantClient] = None
-        self.embedding_client: Optional[OpenAI] = None
 
     def initialize(self):
         qdrant_path = settings.qdrant_path
@@ -33,14 +32,6 @@ class KnowledgeBase:
                 collection_name=COLLECTION_NAME,
                 vectors_config=VectorParams(size=VECTOR_SIZE, distance=Distance.COSINE),
             )
-
-    def _get_embedding_client(self) -> OpenAI:
-        if self.embedding_client is None:
-            self.embedding_client = OpenAI(
-                api_key=settings.dashscope_api_key or "placeholder",
-                base_url=settings.dashscope_base_url,
-            )
-        return self.embedding_client
 
     def chunk_text(self, text: str, source: str) -> list[dict]:
         chunks = []
@@ -78,12 +69,7 @@ class KnowledgeBase:
         return chunks
 
     def _embed(self, texts: list[str]) -> list[list[float]]:
-        client = self._get_embedding_client()
-        response = client.embeddings.create(
-            model=settings.dashscope_embedding_model,
-            input=texts,
-        )
-        return [d.embedding for d in response.data]
+        return provider_registry.embed.embed(texts)
 
     def ingest_directory(self, directory: Optional[Path] = None):
         if directory is None:

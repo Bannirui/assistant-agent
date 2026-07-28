@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from .config import settings
+from .llm.provider import registry as provider_registry, OpenAICompatibleProvider
 from .agent.copilot_agent import agent
 from .sop.engine import sop_engine
 from .rag.knowledge_base import knowledge_base
@@ -34,6 +35,21 @@ class AnalyzeResponse(BaseModel):
 
 @app.on_event("startup")
 async def startup():
+    provider_registry.register_chat(
+        OpenAICompatibleProvider(
+            base_url=settings.llm_base_url,
+            api_key=settings.llm_api_key,
+            model=settings.llm_model,
+        )
+    )
+    provider_registry.register_embed(
+        OpenAICompatibleProvider(
+            base_url=settings.embed_base_url,
+            api_key=settings.embed_api_key,
+            model=settings.embed_model,
+        )
+    )
+
     sop_engine.load_all()
     knowledge_base.initialize()
 
