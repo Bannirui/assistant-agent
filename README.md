@@ -57,7 +57,7 @@ cd ..
 
 # 4. 启动后端 (终端1)
 source .venv/bin/activate
-uvicorn src.main:app --reload --port 8000
+python -m src
 
 # 5. 启动前端 (终端2)
 cd frontend

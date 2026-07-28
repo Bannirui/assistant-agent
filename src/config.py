@@ -5,24 +5,24 @@ from pydantic_settings import BaseSettings
 # 启动后自动读取配置然后覆盖类的默认值 配置加载优先级 环境变量>.env文件>类字段默认值
 class Settings(BaseSettings):
     # LLM大模型
-    # 必填 供应商标识 deepseek/openai/qwen
-    llm_provider: str
-    # 必填 模型名称 deepseek-chat/gpt-4o
-    llm_model: str
-    # 必填 API密钥
-    llm_api_key: str
-    # 必填 API地址
-    llm_base_url: str
+    # 供应商标识 deepseek/openai/qwen
+    llm_provider: str = ""
+    # 模型名称 deepseek-chat/gpt-4o
+    llm_model: str = ""
+    # API密钥
+    llm_api_key: str = ""
+    # API地址
+    llm_base_url: str = ""
 
     # 向量模型
-    # 必填 供应商标识 dashscope/openai/local
-    embed_provider: str
-    # 必填 模型名称
-    embed_model: str
-    # 必填 API密钥
-    embed_api_key: str
-    # 必填 API地址
-    embed_base_url: str
+    # 供应商标识 dashscope/openai/local
+    embed_provider: str = ""
+    # 模型名称
+    embed_model: str = ""
+    # API密钥
+    embed_api_key: str = ""
+    # API地址
+    embed_base_url: str = ""
 
     # 应用配置
     # 运行环境
@@ -61,7 +61,7 @@ class Settings(BaseSettings):
     def data_path(self) -> Path:
         return Path(self.copilot_data_dir)
 
-    model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
+    model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "allow"}
 
 
 settings = Settings()
