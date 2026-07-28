@@ -36,12 +36,14 @@ class Settings(BaseSettings):
 
     # 数据路径
     copilot_data_dir: str = "./data"
-    # SOP YAML文件目录
+    # SOP YAML文件目录 本地要是有SOP文件 在系统启动的时候把本地的SOP放到数据库去
     copilot_sop_dir: str = "./data/sop"
     # 知识库文档目录
     copilot_knowledge_dir: str = "./data/knowledge"
     # Qdrant向量数据存储路径
     copilot_qdrant_path: str = "./data/qdrant"
+    # SQLite数据库路径 存储SOP
+    copilot_db_path: str = "./data/copilot.db"
 
     # 服务配置
     copilot_host: str = "0.0.0.0"

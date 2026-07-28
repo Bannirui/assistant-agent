@@ -1,5 +1,13 @@
 import pytest
 from src.sop.engine import SOPEngine
+from src.sop.db import init_db, import_from_yaml
+from src.config import settings
+
+
+@pytest.fixture(autouse=True, scope="module")
+def setup_db():
+    init_db()
+    import_from_yaml()
 
 
 @pytest.fixture

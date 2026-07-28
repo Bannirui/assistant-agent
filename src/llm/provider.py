@@ -134,43 +134,39 @@ class ProviderRegistry:
     _embed_provider: Optional[LLMProvider]
 
 
-def __init__(self):
-    self._chat_provider: Optional[LLMProvider] = None
-    self._embed_provider: Optional[LLMProvider] = None
+    def __init__(self):
+        self._chat_provider: Optional[LLMProvider] = None
+        self._embed_provider: Optional[LLMProvider] = None
 
+    def register_chat(self, provider: LLMProvider) -> None:
+        r"""
+        注册聊天模型
+        """
+        self._chat_provider = provider
 
-def register_chat(self, provider: LLMProvider):
-    r"""
-    注册聊天模型
-    """
-    self._chat_provider = provider
+    def register_embed(self, provider: LLMProvider) -> None:
+        r"""
+        注册向量模型
+        """
+        self._embed_provider = provider
 
+    @property
+    def chat(self) -> LLMProvider:
+        r"""
+        外面当成属性用 拿到聊天模型
+        """
+        if self._chat_provider is None:
+            raise RuntimeError("Chat provider not registered")
+        return self._chat_provider
 
-def register_embed(self, provider: LLMProvider):
-    r"""
-    注册向量模型
-    """
-    self._embed_provider = provider
-
-
-@property
-def chat(self) -> LLMProvider:
-    r"""
-    外面当成属性用 拿到聊天模型
-    """
-    if self._chat_provider is None:
-        raise RuntimeError("Chat provider not registered")
-    return self._chat_provider
-
-
-@property
-def embed(self) -> LLMProvider:
-    r"""
-    外面当成属性用 拿到向量模型
-    """
-    if self._embed_provider is None:
-        raise RuntimeError("Embedding provider not registered")
-    return self._embed_provider
+    @property
+    def embed(self) -> LLMProvider:
+        r"""
+        外面当成属性用 拿到向量模型
+        """
+        if self._embed_provider is None:
+            raise RuntimeError("Embedding provider not registered")
+        return self._embed_provider
 
 
 registry = ProviderRegistry()

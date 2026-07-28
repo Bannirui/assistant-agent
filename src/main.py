@@ -8,6 +8,7 @@ from .config import settings
 from .llm.provider import registry as provider_registry, OpenAICompatibleProvider
 from .agent.copilot_agent import agent
 from .sop.engine import sop_engine
+from .sop.db import init_db, import_from_yaml
 from .rag.knowledge_base import knowledge_base
 
 # 应用实例
@@ -66,8 +67,15 @@ async def startup() -> None:
             model=settings.embed_model,
         )
     )
-    # 加载sop 把yaml文件加载到内存
+    # 初始化DB SOP表
+    init_db()
+    # 从SOP表构建内存缓存
     sop_engine.load_all()
+    if len(sop_engine._sops) == 0:
+        # 尝试把本地的SOP文件先导到数据库去
+        import_from_yaml()
+        sop_engine.load_all()
+
     # 初始化RAG 初始化向量数据库
     knowledge_base.initialize()
 
@@ -108,11 +116,20 @@ async def analyze_ticket(req: AnalyzeRequest) -> AnalyzeResponse:
 @app.post("/admin/sop/reload")
 async def reload_sop() -> dict[str, Any]:
     r"""
-    管理接口-重载SOP
-    运营更新了SOP文件后通过这个接口进行重新加载
+    从数据库重新加载 SOP 到内存
     """
     result: dict[str, Any] = sop_engine.reload()
     return result
+
+
+@app.post("/admin/sop/import-yaml")
+async def import_sop_yaml() -> dict[str, Any]:
+    r"""
+    从 YAML 文件导入 SOP 到数据库 (首次启动或手动触发)
+    """
+    count: int = import_from_yaml()
+    sop_engine.load_all()
+    return {"status": "imported", "count": count}
 
 
 @app.post("/admin/knowledge/ingest")

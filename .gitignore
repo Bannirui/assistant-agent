@@ -21,3 +21,4 @@ dist/
 
 # 数据
 data/qdrant/
+data/*.db

@@ -2,6 +2,13 @@ import pytest
 from unittest.mock import patch, MagicMock
 
 
+@pytest.fixture(autouse=True, scope="module")
+def setup_db():
+    from src.sop.db import init_db, import_from_yaml
+    init_db()
+    import_from_yaml()
+
+
 @pytest.fixture(autouse=True)
 def setup_sops():
     from src.sop.engine import sop_engine
