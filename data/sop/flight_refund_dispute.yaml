@@ -1,0 +1,32 @@
+id: FLIGHT_REFUND_DISPUTE
+category: "机票"
+issue_types:
+  - "退差价"
+  - "价格争议"
+steps:
+  - "确认订单信息和实际支付金额"
+  - "查询是否在价格保护期内"
+  - "核实同航班同舱位当前价格"
+  - "计算应退差金额"
+  - "发起退差价流程"
+compensation_rules:
+  - condition: "购票24h内"
+    action: "退还差价100%"
+  - condition: "购票24-48h 且 VIP≥金卡"
+    action: "退还差价100%"
+  - condition: "购票24-48h 且 VIP=普通"
+    action: "退还差价50%"
+  - condition: "购票超过48h"
+    action: "不支持退差价，建议客户关注未来优惠活动"
+templates:
+  apply_24h: "您好{customer_name}先生/女士，非常抱歉给您带来不好的体验。经查询，您购买的{cabin}舱位在购票后24小时内申请退差价，符合我司价格保护政策。当前同航班同舱位降价{customer_price}元，我们将为您退还差价{customer_price}元，预计2-3个工作日原路返还到您的支付账户。"
+  apply_48h_vip: "您好{customer_name}先生/女士，感谢您对我司的支持。虽然购票已超过24小时，但作为{vip_level}会员，您享有48小时价格保护权益。当前降价{customer_price}元，我们将为您退还差价。"
+  apply_48h_partial: "您好{customer_name}，购票已超过24小时标准价格保护期。普通会员在24-48h内可退还差价的50%，即{customer_price}元。如升级为金卡会员，可享受更长的价格保护期。"
+  deny: "您好{customer_name}，非常抱歉，您的订单购票已超过价格保护期限（普通会员24小时，金卡/白金会员48小时）。本次无法为您退还差价。建议您关注我司的优惠活动。"
+suggested_actions:
+  - type: "refund"
+    label: "发起退款"
+  - type: "coupon"
+    label: "发放优惠券"
+  - type: "escalate"
+    label: "升级主管"

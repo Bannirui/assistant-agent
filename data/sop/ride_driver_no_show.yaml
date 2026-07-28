@@ -1,0 +1,33 @@
+id: RIDE_DRIVER_NO_SHOW
+category: "打车"
+issue_types:
+  - "司机未到"
+  - "找不到司机"
+steps:
+  - "确认订单信息和约定时间地点"
+  - "核实司机位置和到达状态"
+  - "确认客户等待时长"
+  - "根据等待时间确定补偿方案"
+  - "建议重新下单或取消退款"
+compensation_rules:
+  - condition: "等待<5min，司机联系不上"
+    action: "取消订单全额退款 + 致歉"
+  - condition: "等待5-15min"
+    action: "全额退款 + 补偿10元券"
+  - condition: "等待>15min"
+    action: "全额退款 + 补偿20元券 + 优先派单"
+templates:
+  lt5min: "非常抱歉给您带来不便。已为您取消此订单并全额退款。建议重新下单，我们将为您优先匹配附近司机。"
+  bt5_15min: "非常抱歉，等待时间较长。已为您全额退款，同时发放10元打车券作为补偿。"
+  over15min: "对于这次不愉快的体验我们深表歉意。已全额退款并发放20元打车券，同时为您优先匹配专车服务。"
+suggested_actions:
+  - type: "cancel_refund"
+    label: "取消并退款"
+  - type: "coupon_10"
+    label: "发放10元券"
+  - type: "coupon_20"
+    label: "发放20元券"
+  - type: "reorder"
+    label: "重新派单"
+  - type: "escalate"
+    label: "升级主管"

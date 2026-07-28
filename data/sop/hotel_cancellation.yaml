@@ -1,0 +1,31 @@
+id: HOTEL_CANCELLATION
+category: "酒店"
+issue_types:
+  - "取消预订"
+  - "退款"
+steps:
+  - "确认订单信息和入住时间"
+  - "计算距离入住的时间"
+  - "查询客户的VIP等级"
+  - "根据取消政策计算退费金额"
+  - "发起取消并退款"
+compensation_rules:
+  - condition: "入住48h前"
+    action: "全额退款"
+  - condition: "入住24-48h"
+    action: "退还70%（收取30%手续费）"
+  - condition: "入住24h内"
+    action: "退还50%（收取50%手续费）"
+  - condition: "已入住"
+    action: "不可退款"
+templates:
+  full_refund: "您好{customer_name}先生/女士，已为您查询到订单。当前距离入住时间超过48小时，可为您免费取消订单并全额退款。退款预计2-3个工作日到账。"
+  partial_refund: "您好{customer_name}先生/女士，当前距离入住时间在{customer_price}小时内。根据取消政策，将收取{customer_price}%的退订手续费，退还金额为剩余{customer_price}元。"
+  no_refund: "您好{customer_name}，很抱歉您已办理入住，根据酒店政策无法为您办理退房退款。如有房间问题，可为您协调酒店换房或提供补偿。"
+suggested_actions:
+  - type: "cancel_refund"
+    label: "取消并退款"
+  - type: "coupon"
+    label: "发放补偿券"
+  - type: "escalate"
+    label: "升级主管"

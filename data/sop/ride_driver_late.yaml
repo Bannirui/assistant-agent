@@ -1,0 +1,35 @@
+id: RIDE_DRIVER_LATE
+category: "打车"
+issue_types:
+  - "司机迟到"
+steps:
+  - "确认订单信息和预定时间"
+  - "核实司机实际到达时间"
+  - "计算迟到时长"
+  - "根据迟到时间确定补偿方案"
+  - "安抚客户情绪"
+compensation_rules:
+  - condition: "迟到<5min"
+    action: "致歉，无需补偿"
+  - condition: "迟到5-15min"
+    action: "致歉 + 补偿10元打车券"
+  - condition: "迟到15-30min"
+    action: "致歉 + 补偿20元打车券 + 优先派单"
+  - condition: "迟到>30min"
+    action: "致歉 + 免单 + 补偿50元打车券 + 升级主管处理"
+templates:
+  lt5min: "您好{customer_name}先生/女士，非常抱歉给您带来不便。已确认您预约的车辆存在短暂延误，我们会加强对司机的管理，感谢您的理解。"
+  bt5_15min: "让您久等了，我们深表歉意。已为您申请一张10元打车券作为补偿，将在24小时内发放到您的账户。感谢您的耐心等待。"
+  bt15_30min: "非常抱歉给您造成了较长时间的等待。已为您申请一张20元打车券，同时为您优先匹配附近车辆。我们会严肃处理此事。"
+  over30min: "我们非常重视您反映的问题，对您造成的严重影响深表歉意。已为您免除本次订单费用，同时发放50元打车券补偿。此问题将升级至主管团队跟进处理。"
+suggested_actions:
+  - type: "coupon_10"
+    label: "发放10元券"
+  - type: "coupon_20"
+    label: "发放20元券"
+  - type: "waive_fee"
+    label: "免单"
+  - type: "coupon_50"
+    label: "发放50元券"
+  - type: "escalate"
+    label: "升级主管"

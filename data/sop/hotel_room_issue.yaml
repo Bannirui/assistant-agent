@@ -1,0 +1,31 @@
+id: HOTEL_ROOM_ISSUE
+category: "酒店"
+issue_types:
+  - "房间问题"
+  - "卫生问题"
+  - "设施问题"
+steps:
+  - "确认订单和入住状态"
+  - "了解具体问题（卫生/设施/噪音等）"
+  - "优先协调酒店换房"
+  - "无法换房时计算补偿"
+compensation_rules:
+  - condition: "未入住且无法换房"
+    action: "免费取消 + 补偿50元券"
+  - condition: "已入住且无法换房"
+    action: "退还当日房费 + 补偿等额优惠券"
+  - condition: "可换房"
+    action: "免费升级或换房 + 致歉"
+templates:
+  change_room: "您好{customer_name}先生/女士，非常抱歉给您带来不好的住宿体验。已为您协调酒店更换房间，如新房间仍有问题请随时联系我们。"
+  cancel: "非常抱歉，当前无可换房源。已为您取消订单并全额退款，同时发放50元优惠券作为补偿。"
+  occupied: "非常抱歉影响了您的入住体验。已与酒店沟通，将为您退还当日房费{customer_price}元，并发放等额优惠券。如希望退房，我们可协助您更换其他酒店。"
+suggested_actions:
+  - type: "change_room"
+    label: "协调换房"
+  - type: "cancel_refund"
+    label: "取消并退款"
+  - type: "coupon"
+    label: "发放优惠券"
+  - type: "escalate"
+    label: "升级主管"

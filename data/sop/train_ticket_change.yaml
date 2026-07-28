@@ -1,0 +1,27 @@
+id: TRAIN_TICKET_CHANGE
+category: "火车"
+issue_types:
+  - "改签"
+steps:
+  - "确认订单信息"
+  - "查询是否有同车次可选日期"
+  - "计算改签费用（如有）"
+  - "处理票价差额"
+compensation_rules:
+  - condition: "开车前48h以上"
+    action: "免费改签一次，差价多退少补"
+  - condition: "开车前48h内"
+    action: "收取票价5%改签手续费，差价多退少补"
+  - condition: "开车后"
+    action: "不可改签，建议重新购票"
+templates:
+  free_change: "您好{customer_name}先生/女士，当前距离开车时间超过48小时，可免费为您改签一次。已查询到{customer_price}有同车次同座位类型可选。"
+  paid_change: "您好{customer_name}先生/女士，当前距离开车时间不足48小时，改签需收取票价5%的手续费，即{customer_price}元。改签后票价差额多退少补。"
+  no_change: "您好{customer_name}，很抱歉列车已发出，根据铁路规定无法改签。建议您重新购买所需日期的车票。"
+suggested_actions:
+  - type: "change_ticket"
+    label: "改签车票"
+  - type: "refund"
+    label: "退票重购"
+  - type: "escalate"
+    label: "升级处理"
