@@ -42,8 +42,15 @@ class Settings(BaseSettings):
     copilot_knowledge_dir: str = "./data/knowledge"
     # Qdrant向量数据存储路径
     copilot_qdrant_path: str = "./data/qdrant"
+    # 数据库用哪个 sqlite/mysql
+    copilot_db_type: str = "sqlite"
     # SQLite数据库路径 存储SOP
     copilot_db_path: str = "./data/copilot.db"
+    # 要是用mysql
+    copilot_db_ip: str
+    copilot_db_port: int
+    copilot_db_user: str
+    copilot_db_pwd: str
 
     # 服务配置
     copilot_host: str = "0.0.0.0"
