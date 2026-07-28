@@ -1,9 +1,7 @@
 import pytest
 from unittest.mock import patch, MagicMock
-from src.llm.provider import (
-    OpenAICompatibleProvider,
-    ProviderRegistry,
-)
+from src.llm.providers.openai import OpenAICompatibleProvider
+from src.llm.provider import ProviderRegistry
 
 
 class TestOpenAICompatibleProvider:

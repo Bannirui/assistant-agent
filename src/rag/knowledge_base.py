@@ -7,8 +7,6 @@ from .vector.vector_repo import get_repository, VectorPoint, SearchResult
 
 # 向量库表名 文档数据库的概念
 COLLECTION_NAME = "knowledge_base"
-# 向量维度
-VECTOR_SIZE = 1024
 # 相邻两个块的重复字符数 防止上下文断裂
 CHUNK_OVERLAP = 100
 # 每块最大字符数
@@ -27,7 +25,7 @@ class KnowledgeBase:
         # 向量库的实现
         repo = get_repository()
         # 向量库建表
-        repo.init(COLLECTION_NAME, VECTOR_SIZE)
+        repo.init(COLLECTION_NAME, settings.knowledge_vector_size)
         self._initialized = True
 
     def chunk_text(self, text: str, source: str) -> list[dict]:
@@ -115,7 +113,7 @@ class KnowledgeBase:
 
         repo = get_repository()
         repo.clear(COLLECTION_NAME)
-        repo.init(COLLECTION_NAME, VECTOR_SIZE)
+        repo.init(COLLECTION_NAME, settings.knowledge_vector_size)
 
         points = []
         for i, (chunk, emb) in enumerate(zip(all_chunks, embeddings)):

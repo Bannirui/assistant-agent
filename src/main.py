@@ -2,7 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import settings
-from .llm.provider import registry as provider_registry, OpenAICompatibleProvider
+from .llm.provider import registry as provider_registry
+from .llm.providers.openai import OpenAICompatibleProvider
 from .sop.engine import sop_engine
 from .sop.db import init_db
 from .rag.knowledge_base import knowledge_base
@@ -48,13 +49,17 @@ async def startup() -> None:
         )
     )
     # 向量模型注册 RAG用
-    provider_registry.register_embed(
-        OpenAICompatibleProvider(
-            base_url=settings.embed_base_url,
-            api_key=settings.embed_api_key,
-            model=settings.embed_model,
+    if settings.embed_provider == "local":
+        from .llm.providers.local import LocalEmbeddingProvider
+        provider_registry.register_embed(LocalEmbeddingProvider())
+    else:
+        provider_registry.register_embed(
+            OpenAICompatibleProvider(
+                base_url=settings.embed_base_url,
+                api_key=settings.embed_api_key,
+                model=settings.embed_model,
+            )
         )
-    )
 
     # 初始化DB SOP表
     init_db()

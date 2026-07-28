@@ -89,7 +89,7 @@ def get_repository() -> VectorRepository:
     """
     global _repo
     if _repo is None:
-        impl_type = getattr(settings, "copilot_vector_type", "qdrant")
+        impl_type = getattr(settings, "knowledge_vector_type", "qdrant")
         if impl_type == "chroma":
             from .vector_repo_chroma import VectorRepositoryChroma
             _repo = VectorRepositoryChroma()

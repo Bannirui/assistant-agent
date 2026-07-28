@@ -6,23 +6,23 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     # LLM大模型 Agent对话/推理
     # 供应商标识 deepseek/openai/qwen
-    llm_provider: str = ""
+    llm_provider: str
     # 模型名称 deepseek-chat/gpt-4o
-    llm_model: str = ""
+    llm_model: str
     # API密钥
-    llm_api_key: str = ""
+    llm_api_key: str
     # API地址
-    llm_base_url: str = ""
+    llm_base_url: str
 
     # 向量化模型 RAG知识库检索
     # 供应商标识 dashscope/openai/local
-    embed_provider: str = ""
+    embed_provider: str
     # 模型名称
-    embed_model: str = ""
+    embed_model: str
     # API密钥
-    embed_api_key: str = ""
+    embed_api_key: str
     # API地址
-    embed_base_url: str = ""
+    embed_base_url: str
 
     # 应用配置
     # 运行环境
@@ -58,6 +58,8 @@ class Settings(BaseSettings):
 
     # 向量库类型 qdrant/chroma/milvus
     knowledge_vector_type: str = "qdrant"
+    # 向量维度 (DashScope=1024, 本地BGE-small=512, BGE-large=1024)
+    knowledge_vector_size: int = 1024
 
     # Qdrant本地模式 向量数据存储路径
     knowledge_vector_qdrant_path: str = "./data/qdrant"
@@ -68,7 +70,7 @@ class Settings(BaseSettings):
 
     @property
     def qdrant_path(self) -> Path:
-        return Path(self.copilot_qdrant_path)
+        return Path(self.knowledge_vector_qdrant_path)
 
     @property
     def data_path(self) -> Path:
