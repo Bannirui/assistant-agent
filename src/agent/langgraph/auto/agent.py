@@ -1,7 +1,6 @@
 r"""
-LangChain Agent
-使用langchain.agents.create_agent 高层API
-底层基于LangGraph StateGraph 但提供了middleware等高级抽象
+LangGraph自动ReAct Agent
+使用langgraph.prebuilt.create_react_agent一行生成标准ReAct管线
 """
 
 import json
@@ -9,20 +8,19 @@ import re
 
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage, AIMessage
-from langchain.agents import create_agent
+from langgraph.prebuilt import create_react_agent
 
-from ...config import settings
-from ..base import BaseAgent
-from ..prompts import SYSTEM_PROMPT
-from ..tools import TOOLS
+from ....config import settings
+from ...base import BaseAgent
+from ...prompts import SYSTEM_PROMPT
+from ...tools import TOOLS
 
 
-class LangChainAgent(BaseAgent):
+class LangGraphAutoAgent(BaseAgent):
     r"""
-    LangChain Agent
-    使用langchain.agents.create_agent LangChain包提供的高层Agent API
-    封装了模型绑定/工具循环/状态管理的完整管线
-    比langgraph.prebuilt.create_react_agent提供更多middleware支持
+    LangGraph自动ReAct Agent
+    使用langgraph.prebuilt.create_react_agent自动构建agent+tools节点
+    StateGraph的两个节点(agent/tools)+条件路由 框架一行搞定
     """
 
     def __init__(self):
@@ -31,10 +29,10 @@ class LangChainAgent(BaseAgent):
             api_key=settings.llm_api_key,
             model=settings.llm_model,
         )
-        self.graph = create_agent(
+        self.graph = create_react_agent(
             model=llm,
             tools=TOOLS,
-            system_prompt=SYSTEM_PROMPT,
+            prompt=SYSTEM_PROMPT,
         )
 
     def analyze(self, ticket_id: str) -> dict:
@@ -52,7 +50,7 @@ class LangChainAgent(BaseAgent):
 
         return {
             "analysis": {"intent": "解析失败", "emotion": "未知", "risk": "高"},
-            "reply_template": "LangChain Agent 未产生有效输出",
+            "reply_template": "LangGraph Auto Agent 未产生有效输出",
             "suggested_actions": [],
             "references": {},
             "warnings": ["请人工查看原始输出"],
@@ -71,5 +69,5 @@ class LangChainAgent(BaseAgent):
             "reply_template": content,
             "suggested_actions": [],
             "references": {},
-            "warnings": ["LangChain 输出解析失败，请人工查看原始输出"],
+            "warnings": ["LangGraph Auto 输出解析失败，请人工查看原始输出"],
         }

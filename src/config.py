@@ -31,7 +31,7 @@ class Settings(BaseSettings):
     copilot_log_level: str = "DEBUG"
     # Agent 最大工具调用轮数
     copilot_max_agent_iterations: int = 10
-    # Agent 实现类型 native/langchain/langgraph
+    # Agent 实现类型 native/langchain/langgraph-auto/langgraph-manual(指定langgraph或者langgraph-manual都用手动搭图)
     copilot_agent_type: str = "native"
 
     # 数据路径
