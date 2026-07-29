@@ -64,9 +64,9 @@ class VectorRepositoryQdrant(VectorRepository):
         self, collection: str, query_vector: list[float], top_k: int
     ) -> list[SearchResult]:
         client = self._get_client()
-        results = client.search(
+        results = client.query_points(
             collection_name=collection,
-            query_vector=query_vector,
+            query=query_vector,
             limit=top_k,
         )
         return [
@@ -76,7 +76,7 @@ class VectorRepositoryQdrant(VectorRepository):
                 heading=r.payload.get("heading", ""),
                 relevance_score=round(r.score, 4),
             )
-            for r in results
+            for r in results.points
         ]
 
     def get_status(self, collection: str) -> dict:
