@@ -9,7 +9,7 @@ from langgraph.prebuilt import create_react_agent
 from ...config import settings
 from ...router.order_router import router as order_router
 from ...sop.engine import sop_engine
-from ...calculator.engine import calculator_registry
+from ...calculator import calculator_registry
 from ...rag.knowledge_base import knowledge_base
 from ..base import BaseAgent
 from ..prompts import SYSTEM_PROMPT
@@ -80,10 +80,10 @@ def calculate_refund(category: str, order_id: str, customer_id: str) -> str:
         return "订单或客户信息缺失，无法计算"
     result = calculator_registry.calculate(category, order, customer)
     return str({
-        "refundable": result.refundable,
+        "payable": result.payable,
         "fee_rate": result.fee_rate,
         "fee_amount": result.fee_amount,
-        "refund_amount": result.refund_amount,
+        "settle_amount": result.settle_amount,
         "detail": result.detail,
     })
 

@@ -1,6 +1,6 @@
 from ...router.order_router import router as order_router
 from ...sop.engine import sop_engine
-from ...calculator.engine import calculator_registry
+from ...calculator import calculator_registry
 from ...rag.knowledge_base import knowledge_base
 from .registry import use_tool, tool_registry
 
@@ -136,10 +136,10 @@ def _calculate_refund(arguments: dict) -> str:
         return "订单或客户信息缺失，无法计算"
     result = calculator_registry.calculate(arguments["category"], order, customer)
     return str({
-        "refundable": result.refundable,
+        "payable": result.payable,
         "fee_rate": result.fee_rate,
         "fee_amount": result.fee_amount,
-        "refund_amount": result.refund_amount,
+        "settle_amount": result.settle_amount,
         "detail": result.detail,
     })
 
