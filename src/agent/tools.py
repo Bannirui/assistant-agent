@@ -1,3 +1,10 @@
+from ..router.order_router import router as order_router
+from ..sop.engine import sop_engine
+from ..calculator.engine import calculator_registry
+from ..rag.knowledge_base import knowledge_base
+from .registry import use_tool, tool_registry
+
+# 所有的工具 让LLM推理要用哪个
 TOOLS = [
     {
         "type": "function",
@@ -87,3 +94,59 @@ TOOLS = [
         },
     },
 ]
+
+
+@use_tool()
+def _get_ticket(arguments: dict) -> str:
+    ticket = order_router.get_ticket(arguments["ticket_id"])
+    if ticket is None:
+        return "工单未找到"
+    return str(ticket.raw)
+
+
+@use_tool()
+def _get_order(arguments: dict) -> str:
+    order = order_router.get_order(arguments["order_id"])
+    if order is None:
+        return "订单未找到"
+    return str(order)
+
+
+@use_tool()
+def _get_customer(arguments: dict) -> str:
+    customer = order_router.get_customer(arguments["customer_id"])
+    if customer is None:
+        return "客户未找到"
+    return str(customer)
+
+
+@use_tool()
+def _search_sop(arguments: dict) -> str:
+    result = sop_engine.search(arguments["category"], arguments["issue_type"])
+    if not result["matched"]:
+        return "未匹配到SOP"
+    return str(result)
+
+
+@use_tool()
+def _calculate_refund(arguments: dict) -> str:
+    order = order_router.get_order(arguments["order_id"])
+    customer = order_router.get_customer(arguments["customer_id"])
+    if order is None or customer is None:
+        return "订单或客户信息缺失，无法计算"
+    result = calculator_registry.calculate(arguments["category"], order, customer)
+    return str({
+        "refundable": result.refundable,
+        "fee_rate": result.fee_rate,
+        "fee_amount": result.fee_amount,
+        "refund_amount": result.refund_amount,
+        "detail": result.detail,
+    })
+
+
+@use_tool()
+def _search_knowledge(arguments: dict) -> str:
+    results = knowledge_base.search(arguments["query"])
+    if not results:
+        return "未找到相关知识"
+    return str(results)

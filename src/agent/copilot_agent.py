@@ -3,12 +3,8 @@ import re
 
 from ..config import settings
 from ..llm.provider import registry as provider_registry
-from ..router.order_router import router as order_router
-from ..sop.engine import sop_engine
-from ..calculator.engine import calculator_registry
-from ..rag.knowledge_base import knowledge_base
 from .prompts import SYSTEM_PROMPT, OUTPUT_FORMAT_REMINDER
-from .tools import TOOLS
+from .tools import TOOLS, tool_registry
 
 
 class CopilotAgent:
@@ -16,51 +12,13 @@ class CopilotAgent:
         self.max_iterations = settings.copilot_max_agent_iterations
 
     def _execute_tool(self, tool_name: str, arguments: dict) -> str:
-        if tool_name == "get_ticket":
-            ticket = order_router.get_ticket(arguments["ticket_id"])
-            if ticket is None:
-                return "工单未找到"
-            return str(ticket.raw)
-
-        elif tool_name == "get_order":
-            order = order_router.get_order(arguments["order_id"])
-            if order is None:
-                return "订单未找到"
-            return str(order)
-
-        elif tool_name == "get_customer":
-            customer = order_router.get_customer(arguments["customer_id"])
-            if customer is None:
-                return "客户未找到"
-            return str(customer)
-
-        elif tool_name == "search_sop":
-            result = sop_engine.search(arguments["category"], arguments["issue_type"])
-            if not result["matched"]:
-                return "未匹配到SOP"
-            return str(result)
-
-        elif tool_name == "calculate_refund":
-            order = order_router.get_order(arguments["order_id"])
-            customer = order_router.get_customer(arguments["customer_id"])
-            if order is None or customer is None:
-                return "订单或客户信息缺失，无法计算"
-            result = calculator_registry.calculate(arguments["category"], order, customer)
-            return str({
-                "refundable": result.refundable,
-                "fee_rate": result.fee_rate,
-                "fee_amount": result.fee_amount,
-                "refund_amount": result.refund_amount,
-                "detail": result.detail,
-            })
-
-        elif tool_name == "search_knowledge":
-            results = knowledge_base.search(arguments["query"])
-            if not results:
-                return "未找到相关知识"
-            return str(results)
-
-        return f"未知工具: {tool_name}"
+        r"""
+        :param tool_name: 函数名
+        :param arguments: 函数执行需要的实参
+        :return: 函数的执行结果 函数不同 执行结果不同 所以都转成了字符串
+        """
+        # 从注册中心找到实现
+        return tool_registry.execute(tool_name, arguments=arguments)
 
     def analyze(self, ticket_id: str) -> dict:
         provider = provider_registry.chat
