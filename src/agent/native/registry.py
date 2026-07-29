@@ -9,7 +9,6 @@ class ToolRegistry:
     """
 
     def __init__(self):
-        # 缓存策略实现
         self._handlers: dict[str, callable] = {}
 
     def register(self, name: str, handler: callable) -> None:
@@ -18,7 +17,6 @@ class ToolRegistry:
         :param name: 函数名
         :param handler: 对应的函数实现
         """
-        # 放到缓存
         self._handlers[name] = handler
 
     def execute(self, name: str, *, arguments: dict) -> str:
@@ -28,11 +26,9 @@ class ToolRegistry:
         :param arguments: 函数执行需要的实参
         :return: 函数的执行结果 为了统一 不同的函数执行结果都被转成了字符串
         """
-        # 从注册中心找到具体的实现
         handler = self._handlers.get(name)
         if handler is None:
             return f"未知工具: {name}"
-        # 函数执行
         return handler(arguments)
 
 
@@ -55,7 +51,6 @@ def use_tool(registry: ToolRegistry | None = None, name: str | None = None):
         def wrapper(arguments: dict) -> str:
             return fn(arguments)
 
-        # 注册到注册中心
         registry.register(tool_name, wrapper)
         return wrapper
 

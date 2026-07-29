@@ -6,11 +6,26 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 
 from ..config import settings
-from ..agent.copilot_agent import agent
+from ..agent.factory import create_agent
 from ..sop.engine import sop_engine
 from ..rag.knowledge_base import knowledge_base
 
 router = APIRouter(prefix="/api/copilot", tags=["业务接口"])
+
+# Agent的实例
+_agent = None
+
+
+def _get_agent():
+    r"""
+    延迟初始化Agent单例
+    配置文件里面会配置Agent的实现方式
+    原生Function calling/LangChain/LangGraph
+    """
+    global _agent
+    if _agent is None:
+        _agent = create_agent()
+    return _agent
 
 
 # 请求体
@@ -47,6 +62,7 @@ async def get_status() -> dict[str, Any]:
         # 向量数据库的状态
         "knowledge_base": knowledge_base.get_status(),
         "max_iterations": settings.copilot_max_agent_iterations,
+        "agent_type": settings.copilot_agent_type,
     }
 
 
@@ -57,7 +73,7 @@ async def analyze_ticket(req: AnalyzeRequest) -> AnalyzeResponse:
     触发整个Agent流水线
     """
     # Agent启动ReAct循环 调用各种Tool 返回结构化的结果
-    result: dict[str, Any] = agent.analyze(req.ticket_id)
+    result: dict[str, Any] = _get_agent().analyze(req.ticket_id)
     return AnalyzeResponse(
         ticket_id=req.ticket_id,
         analysis=result.get("analysis", {}),

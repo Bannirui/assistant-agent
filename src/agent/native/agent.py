@@ -1,26 +1,28 @@
 import json
 import re
 
-from ..config import settings
-from ..llm.provider import registry as provider_registry
-from .prompts import SYSTEM_PROMPT, OUTPUT_FORMAT_REMINDER
+from ...config import settings
+from ...llm.provider import registry as provider_registry
+from ..base import BaseAgent
+from ..prompts import SYSTEM_PROMPT, OUTPUT_FORMAT_REMINDER
 from .tools import TOOLS, tool_registry
 
 
-class CopilotAgent:
+class NativeAgent(BaseAgent):
+    r"""
+    原生Function Calling Agent
+    手写ReAct循环 直接调用OpenAI兼容的LLM Tool Calling API
+    工具注册使用@use_tool策略模式
+    """
+
     def __init__(self):
         self.max_iterations = settings.copilot_max_agent_iterations
 
     def _execute_tool(self, tool_name: str, arguments: dict) -> str:
-        r"""
-        :param tool_name: 函数名
-        :param arguments: 函数执行需要的实参
-        :return: 函数的执行结果 函数不同 执行结果不同 所以都转成了字符串
-        """
-        # 从注册中心找到实现
         return tool_registry.execute(tool_name, arguments=arguments)
 
     def analyze(self, ticket_id: str) -> dict:
+        # LLM模型
         provider = provider_registry.chat
 
         messages = [
@@ -29,6 +31,7 @@ class CopilotAgent:
         ]
 
         for iteration in range(self.max_iterations):
+            # 告诉LLM哪些工具可用 看看它想调用哪个工具
             response = provider.chat(messages, tools=TOOLS)
 
             if response.tool_calls:
@@ -77,6 +80,3 @@ class CopilotAgent:
             "references": {},
             "warnings": ["输出格式解析失败，请人工查看原始输出"],
         }
-
-
-agent = CopilotAgent()
