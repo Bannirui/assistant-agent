@@ -25,7 +25,7 @@ class KnowledgeBase:
         # 向量库的实现
         repo = get_repository()
         # 向量库建表
-        repo.init(COLLECTION_NAME, settings.knowledge_vector_size)
+        repo.init(COLLECTION_NAME, settings.vector_size)
         self._initialized = True
 
     def chunk_text(self, text: str, source: str) -> list[dict]:
@@ -113,7 +113,7 @@ class KnowledgeBase:
 
         repo = get_repository()
         repo.clear(COLLECTION_NAME)
-        repo.init(COLLECTION_NAME, settings.knowledge_vector_size)
+        repo.init(COLLECTION_NAME, settings.vector_size)
 
         points = []
         for i, (chunk, emb) in enumerate(zip(all_chunks, embeddings)):

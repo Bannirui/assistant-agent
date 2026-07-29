@@ -56,13 +56,14 @@ class Settings(BaseSettings):
     db_pass: str = ""
     db_name: str = "copilot"
 
+    # 向量维度 (DashScope=1024, 本地BGE-small=512, BGE-large=1024) 用本地向量模型的时候设置小一点防止崩了
+    vector_size: int = 512
+
     # 向量库类型 qdrant/chroma/milvus
     knowledge_vector_type: str = "qdrant"
-    # 向量维度 (DashScope=1024, 本地BGE-small=512, BGE-large=1024)
-    knowledge_vector_size: int = 1024
 
     # Qdrant本地模式 向量数据存储路径
-    knowledge_vector_qdrant_path: str = "./data/qdrant"
+    vector_qdrant_path: str = "./data/qdrant"
 
     # 服务配置
     copilot_host: str = "0.0.0.0"
@@ -70,7 +71,11 @@ class Settings(BaseSettings):
 
     @property
     def qdrant_path(self) -> Path:
-        return Path(self.knowledge_vector_qdrant_path)
+        r"""
+        向量库用Qdrant本地模式时 它的路径
+        :return:
+        """
+        return Path(self.vector_qdrant_path)
 
     @property
     def data_path(self) -> Path:
