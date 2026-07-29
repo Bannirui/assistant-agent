@@ -17,24 +17,27 @@ class FlightRefundCalculator(BaseCalculator):
         # 距离起飞还有多久 >0还没有起飞 距离航班还有x小时 <0已经起飞了 不能退了或者收取高昂的手续费
         hours_before = (departure - datetime.now()).total_seconds() / 3600
         # 二维表 舱位*距离起飞时间
-        fee_table = {
-            "Y": {"before_24h": 0.05, "between_2h_24h": 0.10, "within_2h": 0.20, "after_departure": 0.50},
-            "H": {"before_24h": 0.30, "between_2h_24h": 0.50, "within_2h": 0.80, "after_departure": 1.00},
-            "K": {"before_24h": 0.30, "between_2h_24h": 0.50, "within_2h": 0.80, "after_departure": 1.00},
-            "L": {"before_24h": 0.50, "between_2h_24h": 0.70, "within_2h": 1.00, "after_departure": 1.00},
-            "T": {"before_24h": 1.00, "between_2h_24h": 1.00, "within_2h": 1.00, "after_departure": 1.00},
-        }
-        # 什么舱位
-        tiers = fee_table.get(fare_basis, fee_table["H"])
-
+        FARE_TABLE = [
+            # 起飞前24H [2,24) [0,2) 已经起飞
+            [0.05, 0.10, 0.20, 0.50],  # 舱位Y 全价
+            [0.30, 0.50, 0.80, 1.00],  # 舱位H 经济折扣
+            [0.30, 0.50, 0.80, 1.00],  # 舱位K 经济折扣
+            [0.50, 0.70, 1.00, 1.00],  # 舱位L 低折扣
+            [1.00, 1.00, 1.00, 1.00],  # 舱位T 特价
+        ]
+        FARE_BASIS_IDX = {"Y": 0, "H": 1, "K": 2, "L": 3, "T": 4}
+        # 舱位映射到二维表的行号
+        row = FARE_BASIS_IDX.get(fare_basis, 1)
+        # 起飞时间映射到二维表的列号
+        col = 0
         if hours_before < 0:
-            return tiers["after_departure"]
+            col = 3
         elif hours_before < 2:
-            return tiers["within_2h"]
+            col = 2
         elif hours_before < 24:
-            return tiers["between_2h_24h"]
-        else:
-            return tiers["before_24h"]
+            col = 1
+        # 手续费的费率
+        return FARE_TABLE[row][col]
 
     def _build_detail(
         self, order: dict, customer: dict,
