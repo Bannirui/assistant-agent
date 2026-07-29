@@ -22,11 +22,15 @@ class NativeAgent(BaseAgent):
         return tool_registry.execute(tool_name, arguments=arguments)
 
     def analyze(self, ticket_id: str) -> dict:
+        # OpenAI定义了role来标识消息是谁说的 优先级 system>developer>user>assistant(LLM模型的)
         # LLM模型
         provider = provider_registry.chat
 
+        # Agent Loop 限制循环执行次数 每次问大模型的 相当于要保存上下文
         messages = [
+            # system级的prompt
             {"role": "system", "content": SYSTEM_PROMPT},
+            # user级的prompt
             {"role": "user", "content": f"请分析工单: {ticket_id}"},
         ]
 
@@ -35,6 +39,7 @@ class NativeAgent(BaseAgent):
             response = provider.chat(messages, tools=TOOLS)
 
             if response.tool_calls:
+                # 在Agent Loop的时候每次的对话都要带上上一次的消息 是一次LLM想要访问那些工具 就把这些信息作为assistant级的prompt输入
                 messages.append({
                     "role": "assistant",
                     "content": response.content or "",
@@ -44,6 +49,7 @@ class NativeAgent(BaseAgent):
                 for tc in response.tool_calls:
                     args = json.loads(tc["function"]["arguments"])
                     result = self._execute_tool(tc["function"]["name"], args)
+                    # LLM模型想调用哪些工具 把对应的工具调用结果 用tool级的消息作为输入prompt再告诉模型
                     messages.append({
                         "role": "tool",
                         "tool_call_id": tc["id"],
