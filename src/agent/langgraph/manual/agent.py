@@ -58,9 +58,9 @@ class LangGraphManualAgent(BaseAgent):
 
         self.graph = self._build_graph()
 
-    def _call_llm(self, state: AgentState) -> dict:
+    def _call_llm(self, state: AgentState) -> AgentState:
         r"""
-        节点1
+        结点1
         调用LLM推理
         """
         response = self.llm_with_tools.invoke(state["messages"])
@@ -69,9 +69,9 @@ class LangGraphManualAgent(BaseAgent):
             "remaining_steps": state["remaining_steps"],
         }
 
-    def _execute_tools(self, state: AgentState) -> dict:
+    def _execute_tools(self, state: AgentState) -> AgentState:
         r"""
-        节点2
+        结点2
         执行工具调用
         """
         last_message = state["messages"][-1]
@@ -89,22 +89,9 @@ class LangGraphManualAgent(BaseAgent):
             "remaining_steps": state["remaining_steps"] - 1,
         }
 
-    def _should_continue(self, state: AgentState) -> str:
+    def _final(self, state: AgentState) -> AgentState:
         r"""
-        条件路由
-        判断下一步是继续循环还是输出结果
-        """
-        last_message = state["messages"][-1]
-
-        if state["iteration"] >= self.max_iterations:
-            return "final"
-        if isinstance(last_message, AIMessage) and last_message.tool_calls:
-            return "execute_tools"
-        return "final"
-
-    def _final(self, state: AgentState) -> dict:
-        r"""
-        节点3
+        结点3
         生成最终JSON结果
         """
         messages = list(state["messages"])
@@ -129,6 +116,19 @@ class LangGraphManualAgent(BaseAgent):
             "messages": [AIMessage(content=json.dumps(result, ensure_ascii=False))],
             "result": result,
         }
+
+    def _should_continue(self, state: AgentState) -> str:
+        r"""
+        条件路由
+        判断下一步是继续循环还是输出结果
+        """
+        last_message = state["messages"][-1]
+
+        if state["iteration"] >= self.max_iterations:
+            return "final"
+        if isinstance(last_message, AIMessage) and last_message.tool_calls:
+            return "execute_tools"
+        return "final"
 
     def _build_graph(self):
         r"""
